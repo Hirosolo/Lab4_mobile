@@ -48,7 +48,7 @@ class GameManager(private val context: Context) {
     }
 
     fun createBoss(x: Float, y: Float): BossOpponent {
-        return BossOpponent(x, y, bossBitmap, 30, bossMinionBitmap)
+        return BossOpponent(x, y, bossBitmap, 30)
     }
 
     fun createBossMinion(x: Float, y: Float): Opponent {

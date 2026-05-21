@@ -8,7 +8,6 @@ class BossOpponent(
     y: Float,
     bitmap: Bitmap,
     maxHealth: Int = 20,
-    private val minionSpawnBitmap: Bitmap
 ) : Opponent(x, y, 0f, bitmap, maxHealth) {
     private var direction = 1f
     private var spawnTimer = 0
@@ -57,9 +56,5 @@ class BossOpponent(
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-    }
-
-    fun createSpawnedMinion(x: Float, y: Float): Opponent {
-        return Opponent(x, y, 6f, minionSpawnBitmap, 1)
     }
 }
