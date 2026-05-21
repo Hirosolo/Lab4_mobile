@@ -20,6 +20,8 @@ open class Opponent(
     protected val hitBox: RectF = RectF(x, y, x + width, y + height)
     private val healthBarPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.RED
+        style = Paint.Style.STROKE
+        strokeWidth = 2f
     }
     private val healthFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.GREEN
