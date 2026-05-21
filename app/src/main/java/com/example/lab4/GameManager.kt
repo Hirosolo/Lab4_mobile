@@ -22,4 +22,16 @@ class GameManager(private val context: Context) {
     fun createOpponent(x: Float, y: Float, speed: Float, bitmap: Bitmap, health: Int): Opponent {
         return Opponent(x, y, speed, bitmap, health)
     }
+
+    fun createOpponent(
+        x: Float,
+        y: Float,
+        speed: Float,
+        bitmap: Bitmap,
+        health: Int,
+        laneTargetX: Float,
+        laneSpeedX: Float
+    ): Opponent {
+        return Opponent(x, y, speed, bitmap, health, laneTargetX, laneSpeedX)
+    }
 }

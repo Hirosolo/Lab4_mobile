@@ -86,6 +86,7 @@ class GameView @JvmOverloads constructor(
     private val maxSpeed = 12f
     private var opponentBaseSpeed = startingOpponentBaseSpeed
     private var firingObjectBaseSpeed = startingFiringObjectBaseSpeed
+    private val laneCount = 4
 
     init {
         surfaceHolder.addCallback(this)
@@ -174,13 +175,19 @@ class GameView @JvmOverloads constructor(
             if (Random.nextFloat() < 0.02f) {
                 val randomBitmap = opponentBitmaps.randomOrNull() ?: return
                 val resizedBitmap = Bitmap.createScaledBitmap(randomBitmap, 120, 120, true)
+                val laneWidth = (screenWidth - 120).coerceAtLeast(1) / laneCount.toFloat()
+                val laneIndex = Random.nextInt(laneCount)
+                val laneTargetX = (laneIndex * laneWidth) + laneWidth / 2f
                 val spawnX = Random.nextFloat() * (screenWidth - 120).coerceAtLeast(1)
                 opponents.add(
                     gameManager.createOpponent(
                         spawnX,
                         -120f,
                         opponentBaseSpeed,
-                        resizedBitmap
+                        resizedBitmap,
+                        Random.nextInt(1, 4),
+                        laneTargetX,
+                        2.5f
                     )
                 )
             }
