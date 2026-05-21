@@ -29,17 +29,26 @@ class BossOpponent(
         hitBox.set(x, y, x + width, y + height)
 
         spawnTimer++
-        if (spawnTimer < spawnInterval) {
+        val activeSpawnInterval = if (health <= 10) 25 else spawnInterval
+        if (spawnTimer < activeSpawnInterval) {
             return emptyList()
         }
 
         spawnTimer = 0
         val centerX = x + width / 2f
         val centerY = y + height / 2f
-        return listOf(
-            Pair(centerX - 50f, centerY),
-            Pair(centerX + 50f, centerY)
-        )
+        return if (health <= 10) {
+            listOf(
+                Pair(centerX - 70f, centerY),
+                Pair(centerX, centerY),
+                Pair(centerX + 70f, centerY)
+            )
+        } else {
+            listOf(
+                Pair(centerX - 50f, centerY),
+                Pair(centerX + 50f, centerY)
+            )
+        }
     }
 
     override fun update() {
