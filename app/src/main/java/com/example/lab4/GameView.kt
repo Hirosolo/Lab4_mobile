@@ -71,6 +71,7 @@ class GameView @JvmOverloads constructor(
     private val stateLock = Any()
     private val firingObjects = ArrayList<FiringObject>()
     private val opponents = ArrayList<Opponent>()
+    private val bosses = ArrayList<BossOpponent>()
 
     private var screenWidth = 0
     private var screenHeight = 0
@@ -80,6 +81,7 @@ class GameView @JvmOverloads constructor(
     private var highScore = gamePreferences.getInt(HIGH_SCORE_KEY, 0)
     private var lives = MAX_LIVES
     private var gameOver = false
+    private var bossSpawned = false
 
     private val startingOpponentBaseSpeed = 5f
     private val startingFiringObjectBaseSpeed = 15f
@@ -151,8 +153,11 @@ class GameView @JvmOverloads constructor(
                 }
             }
 
+            bosses.forEach { it.updateBoss(screenWidth) }
+
             val firingObjectsCopy = ArrayList(firingObjects)
             val opponentsCopy = ArrayList(opponents)
+            val bossesCopy = ArrayList(bosses)
 
             collisionLoop@ for (firingObject in firingObjectsCopy) {
                 for (opponent in opponentsCopy) {
@@ -170,9 +175,36 @@ class GameView @JvmOverloads constructor(
                         break@collisionLoop
                     }
                 }
+
+                for (boss in bossesCopy) {
+                    if (RectF.intersects(firingObject.rect, boss.getRect())) {
+                        firingObjects.remove(firingObject)
+                        boss.takeDamage()
+                        if (boss.isDead) {
+                            bosses.remove(boss)
+                            score += 50
+                            if (score > highScore) {
+                                highScore = score
+                                gamePreferences.edit().putInt(HIGH_SCORE_KEY, highScore).apply()
+                            }
+                            bossSpawned = false
+                        }
+                        break@collisionLoop
+                    }
+                }
             }
 
-            if (Random.nextFloat() < 0.02f) {
+            if (!bossSpawned && score >= 150) {
+                bossSpawned = true
+                bosses.add(
+                    gameManager.createBoss(
+                        (screenWidth / 2f) - 110f,
+                        40f
+                    )
+                )
+            }
+
+            if (bosses.isEmpty() && Random.nextFloat() < 0.02f) {
                 val randomBitmap = opponentBitmaps.randomOrNull() ?: return
                 val resizedBitmap = Bitmap.createScaledBitmap(randomBitmap, 120, 120, true)
                 val laneWidth = (screenWidth - 120).coerceAtLeast(1) / laneCount.toFloat()
@@ -205,6 +237,7 @@ class GameView @JvmOverloads constructor(
             }
 
             drawPlayerShip(canvas)
+            bosses.forEach { it.draw(canvas) }
             opponents.forEach { it.draw(canvas) }
             firingObjects.forEach { it.draw(canvas) }
 
@@ -293,7 +326,9 @@ class GameView @JvmOverloads constructor(
         lives = MAX_LIVES
         firingObjects.clear()
         opponents.clear()
+        bosses.clear()
         gameOver = false
+        bossSpawned = false
         setPlayerShipPosition(screenWidth / 2f, screenHeight - 170f)
     }
 
