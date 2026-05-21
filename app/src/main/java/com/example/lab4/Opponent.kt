@@ -17,7 +17,7 @@ open class Opponent(
 ) {
     val width: Float = bitmap.width.toFloat()
     val height: Float = bitmap.height.toFloat()
-    private val rect: RectF = RectF(x, y, x + width, y + height)
+    protected val hitBox: RectF = RectF(x, y, x + width, y + height)
     private val healthBarPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.RED
     }
@@ -44,11 +44,11 @@ open class Opponent(
             }
         }
         y += speed
-        rect.set(x, y, x + width, y + height)
+        hitBox.set(x, y, x + width, y + height)
     }
 
     open fun draw(canvas: Canvas) {
-        canvas.drawBitmap(bitmap, null, rect, null)
+        canvas.drawBitmap(bitmap, null, hitBox, null)
         drawHealthBar(canvas)
     }
 
@@ -61,7 +61,7 @@ open class Opponent(
     }
 
     fun getRect(): RectF {
-        return rect
+        return hitBox
     }
 
     private fun drawHealthBar(canvas: Canvas) {
