@@ -8,7 +8,8 @@ import android.graphics.RectF
 class FiringObject(
     var x: Float,
     var y: Float,
-    var speed: Float
+    var speed: Float,
+    private val velocityX: Float = 0f
 ) {
     private val paint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     val width: Float = 20f
@@ -20,6 +21,7 @@ class FiringObject(
     }
 
     fun update() {
+        x += velocityX
         y -= speed
         rect.set(x, y, x + width, y + height)
     }
