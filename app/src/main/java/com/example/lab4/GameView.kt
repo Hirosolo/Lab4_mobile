@@ -137,7 +137,7 @@ class GameView @JvmOverloads constructor(
             firingObjectBaseSpeed = startingFiringObjectBaseSpeed + score * 0.0005f
 
             firingObjects.forEach { it.update() }
-            firingObjects.removeAll { it.isOffScreen(screenHeight) }
+            firingObjects.removeAll { it.isOffScreen(screenWidth, screenHeight) }
 
             opponents.forEach { it.update() }
             val escapedOpponents = opponents.filter { it.isOffScreen(screenHeight) }
@@ -224,17 +224,56 @@ class GameView @JvmOverloads constructor(
                     resetGame()
                 } else if (screenHeight > 0) {
                     setPlayerShipPosition(event.x, event.y)
-                    firingObjects.add(
-                        FiringObject(
-                            playerShipRect.centerX(),
-                            playerShipRect.top,
-                            firingObjectBaseSpeed
-                        )
-                    )
+                    spawnBulletPattern()
                 }
             }
         }
         return true
+    }
+
+    private fun spawnBulletPattern() {
+        val shipCenterX = playerShipRect.centerX()
+        val bulletOriginY = playerShipRect.top
+        val bulletLevel = when (score) {
+            in 0 until 100 -> 1
+            in 100 until 250 -> 2
+            in 250 until 500 -> 3
+            else -> 4
+        }
+
+        val spreadOffsets = when (bulletLevel) {
+            1 -> listOf(0f)
+            2 -> listOf(-18f, 18f)
+            3 -> listOf(-30f, 0f, 30f)
+            else -> listOf(-42f, -18f, 18f, 42f)
+        }
+
+        spreadOffsets.forEachIndexed { index, offset ->
+            val velocityX = when (bulletLevel) {
+                1 -> 0f
+                2 -> if (index == 0) -1.8f else 1.8f
+                3 -> when (index) {
+                    0 -> -2.4f
+                    1 -> 0f
+                    else -> 2.4f
+                }
+                else -> when (index) {
+                    0 -> -3.0f
+                    1 -> -1.2f
+                    2 -> 1.2f
+                    else -> 3.0f
+                }
+            }
+
+            firingObjects.add(
+                FiringObject(
+                    shipCenterX + offset,
+                    bulletOriginY,
+                    firingObjectBaseSpeed,
+                    velocityX
+                )
+            )
+        }
     }
 
     private fun resetGame() {

@@ -30,7 +30,7 @@ class FiringObject(
         canvas.drawRect(rect, paint)
     }
 
-    fun isOffScreen(screenHeight: Int): Boolean {
-        return y + height < 0
+    fun isOffScreen(screenWidth: Int, screenHeight: Int): Boolean {
+        return y + height < 0 || x + width < 0 || x > screenWidth
     }
 }
