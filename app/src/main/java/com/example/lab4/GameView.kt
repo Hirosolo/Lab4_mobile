@@ -18,9 +18,16 @@ class GameView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : SurfaceView(context, attrs), SurfaceHolder.Callback {
+    companion object {
+        private const val GAME_PREFS = "lab4_game_state"
+        private const val HIGH_SCORE_KEY = "high_score"
+        private const val MAX_LIVES = 3
+    }
+
     private val surfaceHolder = holder
     private var gameThread = GameThread(surfaceHolder, this)
     private val gameManager = GameManager(context)
+    private val gamePreferences = context.getSharedPreferences(GAME_PREFS, Context.MODE_PRIVATE)
 
     private val backgroundBitmap: Bitmap = BitmapFactory.decodeResource(
         resources,
@@ -39,6 +46,11 @@ class GameView @JvmOverloads constructor(
         textSize = 64f
     }
 
+    private val statusPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        textSize = 44f
+    }
+
     private val gameOverPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.RED
         textSize = 96f
@@ -51,6 +63,8 @@ class GameView @JvmOverloads constructor(
     private var screenWidth = 0
     private var screenHeight = 0
     private var score = 0
+    private var highScore = gamePreferences.getInt(HIGH_SCORE_KEY, 0)
+    private var lives = MAX_LIVES
     private var gameOver = false
 
     private val startingOpponentBaseSpeed = 5f
@@ -110,7 +124,15 @@ class GameView @JvmOverloads constructor(
             firingObjects.removeAll { it.isOffScreen(screenHeight) }
 
             opponents.forEach { it.update() }
-            opponents.removeAll { it.isOffScreen(screenHeight) }
+            val escapedOpponents = opponents.filter { it.isOffScreen(screenHeight) }
+            if (escapedOpponents.isNotEmpty()) {
+                lives -= escapedOpponents.size
+                opponents.removeAll(escapedOpponents.toSet())
+                if (lives <= 0) {
+                    gameOver = true
+                    lives = 0
+                }
+            }
 
             val firingObjectsCopy = ArrayList(firingObjects)
             val opponentsCopy = ArrayList(opponents)
@@ -121,15 +143,12 @@ class GameView @JvmOverloads constructor(
                         firingObjects.remove(firingObject)
                         opponents.remove(opponent)
                         score += 10
+                        if (score > highScore) {
+                            highScore = score
+                            gamePreferences.edit().putInt(HIGH_SCORE_KEY, highScore).apply()
+                        }
                         break@collisionLoop
                     }
-                }
-            }
-
-            for (opponent in opponents) {
-                if (opponent.y + opponent.height >= screenHeight - 100f) {
-                    gameOver = true
-                    break
                 }
             }
 
@@ -163,6 +182,8 @@ class GameView @JvmOverloads constructor(
             firingObjects.forEach { it.draw(canvas) }
 
             canvas.drawText("Score: $score", 32f, 80f, scorePaint)
+            canvas.drawText("High Score: $highScore", 32f, 140f, statusPaint)
+            canvas.drawText("Lives: $lives", 32f, 190f, statusPaint)
 
             if (gameOver) {
                 canvas.drawText(
@@ -202,6 +223,7 @@ class GameView @JvmOverloads constructor(
         score = 0
         opponentBaseSpeed = startingOpponentBaseSpeed
         firingObjectBaseSpeed = startingFiringObjectBaseSpeed
+        lives = MAX_LIVES
         firingObjects.clear()
         opponents.clear()
         gameOver = false
