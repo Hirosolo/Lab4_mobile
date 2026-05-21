@@ -35,6 +35,18 @@ class GameView @JvmOverloads constructor(
     )
     private var backgroundScaledBitmap: Bitmap = backgroundBitmap
 
+    private val playerShipBitmap: Bitmap = BitmapFactory.decodeResource(
+        resources,
+        R.drawable.rocket_2
+    )
+    private var playerShipScaledBitmap: Bitmap = Bitmap.createScaledBitmap(
+        playerShipBitmap,
+        140,
+        140,
+        true
+    )
+    private val playerShipRect = RectF()
+
     private val opponentBitmaps: List<Bitmap> = listOf(
         BitmapFactory.decodeResource(resources, R.drawable.rocket),
         BitmapFactory.decodeResource(resources, R.drawable.rocket_2),
@@ -62,6 +74,8 @@ class GameView @JvmOverloads constructor(
 
     private var screenWidth = 0
     private var screenHeight = 0
+    private var playerShipX = 0f
+    private var playerShipY = 0f
     private var score = 0
     private var highScore = gamePreferences.getInt(HIGH_SCORE_KEY, 0)
     private var lives = MAX_LIVES
@@ -92,6 +106,8 @@ class GameView @JvmOverloads constructor(
             screenWidth = width
             screenHeight = height
             backgroundScaledBitmap = Bitmap.createScaledBitmap(backgroundBitmap, width, height, true)
+            playerShipScaledBitmap = Bitmap.createScaledBitmap(playerShipBitmap, 140, 140, true)
+            setPlayerShipPosition(width / 2f, height - 170f)
         }
     }
 
@@ -178,6 +194,7 @@ class GameView @JvmOverloads constructor(
                 canvas.drawColor(Color.BLACK)
             }
 
+            drawPlayerShip(canvas)
             opponents.forEach { it.draw(canvas) }
             firingObjects.forEach { it.draw(canvas) }
 
@@ -206,10 +223,11 @@ class GameView @JvmOverloads constructor(
                 if (gameOver) {
                     resetGame()
                 } else if (screenHeight > 0) {
+                    setPlayerShipPosition(event.x, event.y)
                     firingObjects.add(
                         FiringObject(
-                            event.x,
-                            screenHeight - 100f,
+                            playerShipRect.centerX(),
+                            playerShipRect.top,
                             firingObjectBaseSpeed
                         )
                     )
@@ -227,5 +245,20 @@ class GameView @JvmOverloads constructor(
         firingObjects.clear()
         opponents.clear()
         gameOver = false
+        setPlayerShipPosition(screenWidth / 2f, screenHeight - 170f)
+    }
+
+    private fun setPlayerShipPosition(centerX: Float, centerY: Float) {
+        val shipWidth = playerShipScaledBitmap.width.toFloat()
+        val shipHeight = playerShipScaledBitmap.height.toFloat()
+        val left = (centerX - shipWidth / 2f).coerceIn(0f, (screenWidth - shipWidth).coerceAtLeast(0f))
+        val top = (centerY - shipHeight / 2f).coerceIn(0f, (screenHeight - shipHeight).coerceAtLeast(0f))
+        playerShipX = left
+        playerShipY = top
+        playerShipRect.set(left, top, left + shipWidth, top + shipHeight)
+    }
+
+    private fun drawPlayerShip(canvas: Canvas) {
+        canvas.drawBitmap(playerShipScaledBitmap, null, playerShipRect, null)
     }
 }
