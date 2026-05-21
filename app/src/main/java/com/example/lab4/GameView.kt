@@ -153,7 +153,17 @@ class GameView @JvmOverloads constructor(
                 }
             }
 
-            bosses.forEach { it.updateBoss(screenWidth) }
+            bosses.forEach { boss ->
+                val spawnPoints = boss.updateBoss(screenWidth)
+                spawnPoints.forEach { (spawnX, spawnY) ->
+                    opponents.add(
+                        gameManager.createBossMinion(
+                            spawnX,
+                            spawnY
+                        )
+                    )
+                }
+            }
 
             val firingObjectsCopy = ArrayList(firingObjects)
             val opponentsCopy = ArrayList(opponents)
