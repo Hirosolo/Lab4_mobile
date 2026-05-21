@@ -11,7 +11,9 @@ open class Opponent(
     var y: Float,
     var speed: Float,
     private val bitmap: Bitmap,
-    private val maxHealth: Int = 1
+    private val maxHealth: Int = 1,
+    private val laneTargetX: Float? = null,
+    private val laneSpeedX: Float = 0f
 ) {
     val width: Float = bitmap.width.toFloat()
     val height: Float = bitmap.height.toFloat()
@@ -33,6 +35,14 @@ open class Opponent(
         get() = health <= 0
 
     open fun update() {
+        laneTargetX?.let { targetX ->
+            val distance = targetX - x
+            if (kotlin.math.abs(distance) > laneSpeedX) {
+                x += laneSpeedX * kotlin.math.sign(distance)
+            } else {
+                x = targetX
+            }
+        }
         y += speed
         rect.set(x, y, x + width, y + height)
     }
