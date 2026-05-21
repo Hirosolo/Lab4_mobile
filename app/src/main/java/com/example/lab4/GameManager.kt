@@ -10,6 +10,18 @@ class GameManager(private val context: Context) {
         context.resources,
         R.drawable.token_red_emovebg
     )
+    private val bossBitmap: Bitmap = Bitmap.createScaledBitmap(
+        BitmapFactory.decodeResource(context.resources, R.drawable.alian),
+        220,
+        220,
+        true
+    )
+    private val bossMinionBitmap: Bitmap = Bitmap.createScaledBitmap(
+        BitmapFactory.decodeResource(context.resources, R.drawable.alian),
+        96,
+        96,
+        true
+    )
 
     fun createOpponent(x: Float, y: Float, speed: Float): Opponent {
         return Opponent(x, y, speed, defaultOpponentBitmap, Random.nextInt(1, 4))
@@ -33,5 +45,13 @@ class GameManager(private val context: Context) {
         laneSpeedX: Float
     ): Opponent {
         return Opponent(x, y, speed, bitmap, health, laneTargetX, laneSpeedX)
+    }
+
+    fun createBoss(x: Float, y: Float): BossOpponent {
+        return BossOpponent(x, y, bossBitmap, 30, bossMinionBitmap)
+    }
+
+    fun createBossMinion(x: Float, y: Float): Opponent {
+        return Opponent(x, y, 6f, bossMinionBitmap, 1)
     }
 }
