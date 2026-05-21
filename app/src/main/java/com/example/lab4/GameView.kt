@@ -157,11 +157,14 @@ class GameView @JvmOverloads constructor(
                 for (opponent in opponentsCopy) {
                     if (RectF.intersects(firingObject.rect, opponent.getRect())) {
                         firingObjects.remove(firingObject)
-                        opponents.remove(opponent)
-                        score += 10
-                        if (score > highScore) {
-                            highScore = score
-                            gamePreferences.edit().putInt(HIGH_SCORE_KEY, highScore).apply()
+                        opponent.takeDamage()
+                        if (opponent.isDead) {
+                            opponents.remove(opponent)
+                            score += 10
+                            if (score > highScore) {
+                                highScore = score
+                                gamePreferences.edit().putInt(HIGH_SCORE_KEY, highScore).apply()
+                            }
                         }
                         break@collisionLoop
                     }

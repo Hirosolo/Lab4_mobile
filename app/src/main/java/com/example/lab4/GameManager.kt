@@ -3,6 +3,7 @@ package com.example.lab4
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import kotlin.random.Random
 
 class GameManager(private val context: Context) {
     private val defaultOpponentBitmap: Bitmap = BitmapFactory.decodeResource(
@@ -11,10 +12,14 @@ class GameManager(private val context: Context) {
     )
 
     fun createOpponent(x: Float, y: Float, speed: Float): Opponent {
-        return Opponent(x, y, speed, defaultOpponentBitmap)
+        return Opponent(x, y, speed, defaultOpponentBitmap, Random.nextInt(1, 4))
     }
 
     fun createOpponent(x: Float, y: Float, speed: Float, bitmap: Bitmap): Opponent {
-        return Opponent(x, y, speed, bitmap)
+        return Opponent(x, y, speed, bitmap, Random.nextInt(1, 4))
+    }
+
+    fun createOpponent(x: Float, y: Float, speed: Float, bitmap: Bitmap, health: Int): Opponent {
+        return Opponent(x, y, speed, bitmap, health)
     }
 }
